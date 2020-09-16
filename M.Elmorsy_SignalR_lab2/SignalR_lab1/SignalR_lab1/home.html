@@ -1,0 +1,64 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <script src="Scripts/jquery-1.6.4.js"></script>
+    <script src="Scripts/jquery.signalR-2.4.1.js"></script>
+    <script src="signalr/hubs"></script>
+    <script>
+        $(function () {
+            
+            name = prompt("please enter your name :")
+            $("#welcome").append(`<span>${name}</span>`);
+
+            //define hub
+            _proxy = $.connection.chat;
+
+            //start connection on that hub
+            $.connection.hub.start();
+
+            _proxy.client.newMessage = function (name, message) {
+                $("#messages").append(`<li> ${name} : ${message} </li>`)
+            }
+
+            _proxy.client.newMember = function (name, groupName) {
+                $("#messages").append(`<li><i> ${name} joined ${groupName} </i></li>`)
+            }
+
+            _proxy.client.newGroupMessage = function (name, groupName, message) {
+                $("#messages").append(`<li> ${name} (${groupName}) : ${message}</li>`)
+            }
+
+        })
+
+        function send() {
+            _proxy.server.sendMessage(name, $("#txt").val());
+        }
+
+        function join() {
+            _proxy.server.joinGroup($("#txt_group").val(), name);
+        }
+
+        function sendToGroup() {
+            _proxy.server.sendGroup($("#txt_group").val(), name, $("#txt").val());
+        }
+
+    </script>
+</head>
+<body>
+
+    <div id="welcome">Welcome </div>
+    <input type="text" id="txt" />
+    <input type="button" value="send" onclick="send()" />
+    <br />
+    <input type="text" id="txt_group" />
+    <input type="button" value="join" onclick="join()" />
+    <br />
+    <input type="button" value="send to group" onclick="sendToGroup()" />
+
+
+    <ul id="messages">
+    </ul>
+</body>
+</html>
